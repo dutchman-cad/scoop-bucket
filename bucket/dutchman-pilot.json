@@ -1,15 +1,15 @@
 {
-    "version": "0.1.0-beta.1",
+    "version": "0.1.0-beta.2",
     "description": "Pilot: CAD automation and evaluation tools",
     "homepage": "https://github.com/dutchman-cad/pilot",
     "license": "Apache-2.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dutchman-cad/pilot/releases/download/v0.1.0-beta.1/pilot-0.1.0-beta.1-x86_64-windows.zip",
-            "hash": "0289710e449d02c453846018aa2730e1682076aa8afdf40d84e34e3fda86fcb6"
+            "url": "https://github.com/dutchman-cad/pilot/releases/download/v0.1.0-beta.2/pilot-0.1.0-beta.2-x86_64-windows.zip",
+            "hash": "14cbc2663a62275ed380eec15efd3abc1ed154b3ea2bb584f21c686856b93411"
         }
     },
-    "extract_dir": "pilot-0.1.0-beta.1-x86_64-windows",
+    "extract_dir": "pilot-0.1.0-beta.2-x86_64-windows",
     "bin": [
         "dutchman-pilot.exe",
         "dutchman-pilot-eval.exe"
