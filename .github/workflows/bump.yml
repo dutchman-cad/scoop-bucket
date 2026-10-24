@@ -1,0 +1,91 @@
+name: Update releases
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scoop-bucket-bump-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Resolve and verify releases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/bump.py
+      - name: Detect manifest changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet -- bucket/; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          name: bumped-manifests
+          path: bucket/*.json
+          if-no-files-found: error
+          retention-days: 1
+
+  test:
+    needs: bump
+    if: needs.bump.outputs.changed == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: bumped-manifests
+          path: bucket
+      - name: Install, smoke test, and uninstall
+        shell: pwsh
+        run: ./scripts/test-install.ps1
+
+  commit:
+    needs: [bump, test]
+    if: needs.bump.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: bumped-manifests
+          path: bucket
+      - name: Commit verified updates
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for app in dutchman dutchman-pilot; do
+            manifest="bucket/$app.json"
+            if ! git diff --quiet -- "$manifest"; then
+              version=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$manifest")
+              git add -- "$manifest"
+              git commit -m "$app: Update to version $version"
+            fi
+          done
+          git push origin "HEAD:$TARGET_BRANCH"

@@ -1,0 +1,45 @@
+name: Validate bucket
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scoop-bucket-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Validate JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for path in sorted(Path('bucket').glob('*.json')):
+              manifest = json.loads(path.read_text(encoding='utf-8'))
+              print(f'{path}: valid JSON')
+          PY
+      - name: Test bump behavior
+        run: python -m unittest discover -s scripts -p 'test_*.py' -v
+
+  test:
+    needs: validate
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install, smoke test, and uninstall
+        shell: pwsh
+        run: ./scripts/test-install.ps1

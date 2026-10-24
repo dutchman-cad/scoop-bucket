@@ -1,0 +1,46 @@
+{
+    "version": "0.1.0-beta.1",
+    "description": "Pilot: CAD automation and evaluation tools",
+    "homepage": "https://github.com/dutchman-cad/pilot",
+    "license": "Apache-2.0",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/dutchman-cad/pilot/releases/download/v0.1.0-beta.1/pilot-0.1.0-beta.1-x86_64-windows.zip",
+            "hash": "0289710e449d02c453846018aa2730e1682076aa8afdf40d84e34e3fda86fcb6"
+        }
+    },
+    "extract_dir": "pilot-0.1.0-beta.1-x86_64-windows",
+    "bin": [
+        "dutchman-pilot.exe",
+        "dutchman-pilot-eval.exe"
+    ],
+    "checkver": {
+        "url": "https://api.github.com/repos/dutchman-cad/pilot/releases",
+        "script": [
+            "$releases = @(ConvertFrom-Json -InputObject $page)",
+            "$headers = @{ \"User-Agent\" = \"Scoop\" }",
+            "if ($env:GITHUB_TOKEN) { $headers.Authorization = \"Bearer $env:GITHUB_TOKEN\" }",
+            "try {",
+            "    $release = Invoke-RestMethod -Uri \"https://api.github.com/repos/dutchman-cad/pilot/releases/latest\" -Headers $headers -ErrorAction Stop",
+            "} catch {",
+            "    if ([int]$_.Exception.Response.StatusCode -ne 404) { throw }",
+            "    $release = $releases | Where-Object { -not $_.draft -and $_.tag_name -ne \"nightly\" } | Select-Object -First 1",
+            "}",
+            "if (-not $release -or $release.draft -or $release.tag_name -eq \"nightly\") { throw \"No eligible Pilot release\" }",
+            "@{ tag_name = $release.tag_name } | ConvertTo-Json"
+        ],
+        "jsonpath": "$.tag_name",
+        "regex": "^v?([0-9][0-9A-Za-z.+-]*)$"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/dutchman-cad/pilot/releases/download/v$version/pilot-$version-x86_64-windows.zip",
+                "hash": {
+                    "url": "$url.sha256"
+                }
+            }
+        },
+        "extract_dir": "pilot-$version-x86_64-windows"
+    }
+}
