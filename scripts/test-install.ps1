@@ -14,11 +14,8 @@ Invoke-RestMethod -Uri 'https://get.scoop.sh' -OutFile $installer
 Assert-ExitCode 'Scoop installation'
 $env:PATH = "$(Join-Path $env:USERPROFILE 'scoop\shims');$env:PATH"
 
-scoop bucket add dutchman-cad $env:GITHUB_WORKSPACE
-Assert-ExitCode 'Adding the bucket'
 try {
-    # Install the actual workspace files, including manifests downloaded from
-    # the bump job, rather than the bucket clone's committed copies.
+    # Install the workspace manifests directly, including those from the update job.
     foreach ($app in @('dutchman', 'dutchman-pilot')) {
         $manifest = Join-Path $env:GITHUB_WORKSPACE "bucket\$app.json"
         scoop install $manifest
