@@ -1,15 +1,15 @@
 {
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Dutchman Convert: CAD conversion tools and desktop app",
     "homepage": "https://github.com/dutchman-cad/dutchman",
     "license": "Apache-2.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/dutchman-cad/dutchman/releases/download/v0.2.1/dutchman-0.2.1-x86_64-pc-windows-msvc.zip",
-            "hash": "6976db217638ff76a8dab341a6b2506790d2e7b52ac86cfb4e9d42685373193b"
+            "url": "https://github.com/dutchman-cad/dutchman/releases/download/v0.2.2/dutchman-0.2.2-x86_64-pc-windows-msvc.zip",
+            "hash": "2be9fc25bd42f277ab7ec4a3e4ce88cce34c61c7fb479e02e37b475933f2d9a4"
         }
     },
-    "extract_dir": "dutchman-0.2.1-x86_64-pc-windows-msvc",
+    "extract_dir": "dutchman-0.2.2-x86_64-pc-windows-msvc",
     "bin": [
         "dutchman.exe",
         "dutchman-mcp.exe"
